@@ -1,0 +1,221 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+:root {
+    /* Fonds et Surfaces */
+    --bg-surface:#141B18; /* Fond des cartes et du graphique */
+    --bg-date-selector: #19221D;
+    --bg-input:#1B2520;
+    --bg-segmented-control:#0E1611;
+    --bg-option-selected:#304C3B;
+    --bg-period-selected:#2C4033;
+    --bg-chart-tooltip:#2B4935;
+    /* Accents et Donnees */
+    --color-primary: #ACF0C6 ;/* couleur de la courbe Eur et interrupteur actif*/
+    /* Textes */
+    --text-heading: #F0F5F1; /* titre principal */;
+    --text-primary: #EFF5F0;/* valeurs principales des statistiques */
+    --text-input: #E1EAE4; /* valeurs des menus deroulants */
+    --text-secondary: #93A99C;/* libelle des stats */
+    --text-muted: #82988A; /* info compl */
+    --text-chart-axis: #89A192;
+    --text-option-selected: #C5F6D6; /* texte de l'option eur */
+    /* Borders */
+    --border-surface:#26332C; /* coutour des cartes */
+    --border-input: #304137; /* contour des menus deroulants */
+    --border-divider: #2A382F; /* separateur entre stats */
+    --border-chart-grid: #26352C; /* ligne de grille du graph */
+    /* Polices */
+    --font-size-page-title:32px;
+    --font-size-stat-value:30px;
+    --font-size-section-title:18px;
+    --font-size-panel-title:15px;
+    --font-size-body:14px;
+    --font-size-date:13px;
+    --font-size-label:12px;
+    --font-size-description:12px;
+    --font-size-control-small:11px;
+    --font-size-chart-axis:11px;
+}
+
+body {
+    background: #000000;
+    color: #E1EAE4;
+    font-family: "Arial";
+    margin:0;
+}
+
+.header {
+    background:var(--bg-surface);
+    min-height: 8vh;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.header h1 {
+    font-family: "Arial";
+    color: var(--text-heading);
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.stats-panel {
+    background-color:  var(--bg-surface);
+    color: var(--text-primary);
+    margin: 15px;
+    border: solid var(--border-surface) 2px;
+    display: flex;
+    align-items: center;
+    font-family: "Arial";
+    font-size: 1rem;
+}
+
+.stats {
+    flex:1;
+    text-align: center;
+}
+
+.stats + .stats {
+    border-left: 1px solid var(--border-divider);
+}
+
+.stats-panel .win {
+    font-size: 1rem;
+    color: var(--text-option-selected);
+}
+
+.stats-panel .loss {
+    font-size: 1rem;
+    color: palevioletred;
+}
+.chart-card {
+    display: flex;
+    max-width: 100%;
+    flex:1;
+}
+
+
+.chart-wrapper {
+    background-color: var(--bg-surface);
+    border: solid var(--border-surface) 2px;
+    margin-top: 15px;
+    margin-right: 15px;
+    margin-bottom: 15px;
+    display: flex;
+    min-width: 0;
+    flex:1;
+}
+
+.chart-controls {
+    background-color: var(--bg-surface);
+    color: var(--text-primary);
+    margin-top: 15px;
+    margin-left: 15px;
+    margin-right: 15px;
+    margin-bottom: 15px;
+    border: solid var(--border-surface) 2px;
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-controls h2 {
+    margin: 15px;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.switch {
+    appearance: none;
+    margin: 0;
+    position: relative;
+    width: 40px;
+    height: 22px;
+    border-radius: 999px;
+    background: var(--bg-input);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.switch::before {
+    content:"";
+    position:absolute;
+    top:3px;
+    left:3px;
+    width:16px;
+    height:16px;
+    border-radius: 50%;
+    background: white;
+    transition: transform 0.2s;
+}
+
+.switch:checked {
+    background: var(--bg-option-selected);
+}
+
+.switch:checked::before {
+    transform: translateX(18px);
+}
+
+/* 1. Le conteneur : les deux options côte à côte, dans un cadre arrondi */
+.segmented {
+  display: inline-flex;
+  border: 1px solid #2a3d33;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #0b1712;
+}
+
+/* 2. Les ronds des boutons radio : invisibles, mais toujours utilisables */
+.segmented input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 3. Les labels deviennent les "boutons" */
+.segmented label {
+  padding: 6px 16px;
+  color: #93A99C;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+/* Un trait entre les deux options */
+.segmented label:not(:last-child) {
+  border-right: 1px solid #2a3d33;
+}
+
+/* Au survol, le texte s'éclaircit */
+.segmented label:hover {
+  color: #E1EAE4;
+}
+
+/* 4. L'option choisie est mise en valeur */
+.segmented input:checked + label {
+  background: #2fa36b;
+  color: #0b1712;
+  font-weight: bold;
+}
+
+/* Le contour pour la navigation au clavier */
+.segmented input:focus-visible + label {
+  outline: 2px solid #ACF0C6;
+  outline-offset: -2px;
+}

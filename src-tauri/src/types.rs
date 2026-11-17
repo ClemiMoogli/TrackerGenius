@@ -1,0 +1,85 @@
+use serde::{Deserialize, Serialize};
+
+pub struct TableInfo {
+    pub nb_player: u8,
+    pub button_number: u8,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct CurvePoint {
+    pub hand_id: String,
+    pub date: String,
+    pub net: i64,
+    pub net_bb: f64,
+    pub cumulative: i64,
+    pub cumulative_bb: f64,
+    pub cumulative_showdown: i64,
+    pub cumulative_showdown_bb: f64,
+    pub cumulative_nonshowdown: i64,
+    pub cumulative_nonshowdown_bb: f64,
+}
+
+pub enum GameFormat {
+    Tournament,
+    CashGame,
+    SitAndGo,
+    Other,
+}
+pub enum PokerFormat {
+    NoLimitHoldem,
+    PotLimitOmaha,
+    Other,
+}
+
+pub struct Hand {
+    pub game_format: GameFormat,
+    pub id: String,
+    pub date: String,
+    pub poker_format: PokerFormat,
+    pub small_blind: i64,
+    pub big_blind: i64,
+    pub button_seat: u8,
+    pub seats: Vec<Seat>,
+    pub actions: Vec<Action>,
+    pub is_showdown: bool,
+}
+
+pub struct Seat {
+    pub number: u8,
+    pub player: String,
+    pub stack: i64,
+}
+
+pub struct Action {
+    pub street: Street,
+    pub player: String,
+    pub action: ActionKind,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum Street {
+    Preflop,
+    Flop,
+    Turn,
+    River,
+}
+
+pub enum ActionKind {
+    PostSmallBlind(i64),
+    PostBigBlind(i64),
+    Fold,
+    Check,
+    Call(i64),
+    Bet(i64),
+    RaiseTo(i64),
+    Collect(i64),
+}
+
+pub struct Header {
+    pub game_format: GameFormat,
+    pub id: String,
+    pub poker_format: PokerFormat,
+    pub small_blind: i64,
+    pub big_blind: i64,
+    pub date: String,
+}
