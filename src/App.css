@@ -172,24 +172,23 @@ body {
     transform: translateX(18px);
 }
 
-/* 1. Le conteneur : les deux options côte à côte, dans un cadre arrondi */
 .segmented {
-  display: inline-flex;
-  border: 1px solid #2a3d33;
-  border-radius: 8px;
+  display: flex;
+  border: 1px solid var(--border-input);
   overflow: hidden;
-  background: #0b1712;
+  background: var(--bg-date-selector);
+  align-items: center;
+  text-align: center;
 }
 
-/* 2. Les ronds des boutons radio : invisibles, mais toujours utilisables */
 .segmented input {
   position: absolute;
   opacity: 0;
   pointer-events: none;
 }
 
-/* 3. Les labels deviennent les "boutons" */
 .segmented label {
+    flex:1;
   padding: 6px 16px;
   color: #93A99C;
   font-size: 0.9rem;
@@ -207,14 +206,12 @@ body {
   color: #E1EAE4;
 }
 
-/* 4. L'option choisie est mise en valeur */
 .segmented input:checked + label {
-  background: #2fa36b;
+  background: var(--bg-option-selected);
   color: #0b1712;
   font-weight: bold;
 }
 
-/* Le contour pour la navigation au clavier */
 .segmented input:focus-visible + label {
   outline: 2px solid #ACF0C6;
   outline-offset: -2px;
