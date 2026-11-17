@@ -1,4 +1,5 @@
-use crate::types::{ActionKind, CurvePoint, GameFormat, Hand, Street};
+use crate::commands::{self, CurvePoint, Filters, Position};
+use crate::types::{ActionKind, GameFormat, Hand, Street};
 
 fn net_result(hand: &Hand, player: &str) -> i64 {
     let mut collected: i64 = 0;
@@ -42,7 +43,67 @@ fn went_to_showdown(hand: &Hand, player: &str) -> bool {
     true
 }
 
-pub fn profit_curve(hands: &[Hand], player: &str) -> Vec<CurvePoint> {
+fn find_position(hand: &Hand, player: &str) -> Option<Position> {
+    let nb_seats: usize = hand.seats.len();
+    let btn_index = hand
+        .seats
+        .iter()
+        .position(|s| s.number == hand.button_seat)?;
+    let name: &[Position] = match nb_seats {
+        6 => &[
+            Position::BTN,
+            Position::SB,
+            Position::BB,
+            Position::UTG,
+            Position::MP,
+            Position::CO,
+        ],
+        5 => &[
+            Position::BTN,
+            Position::SB,
+            Position::BB,
+            Position::UTG,
+            Position::CO,
+        ],
+        4 => &[Position::BTN, Position::SB, Position::BB, Position::CO],
+        3 => &[Position::BTN, Position::SB, Position::BB],
+        2 => &[Position::SB, Position::BB],
+        _ => return None,
+    };
+
+    for i in 0..nb_seats {
+        let seat = &hand.seats[(i + btn_index) % nb_seats];
+        if seat.player == player {
+            return Some(name[i]);
+        }
+    }
+    None
+}
+
+fn matches_filters(hand: &Hand, player: &str, filters: &Filters) -> bool {
+    if let Some(start_date) = &filters.start_date {
+        let start_date = start_date.replace("-", "/");
+        if hand.date.as_str() < start_date.as_str() {
+            return false;
+        }
+    }
+    if let Some(end_date) = &filters.end_date {
+        let end_date = end_date.replace("-", "/");
+        if hand.date.as_str() > end_date.as_str() {
+            return false;
+        }
+    }
+    if let Some(position) = filters.position {
+        if find_position(hand, player) != Some(position) {
+            return false;
+        }
+    }
+    // street
+    // action
+    true
+}
+
+pub fn profit_curve(hands: &[Hand], player: &str, filters: Filters) -> Vec<CurvePoint> {
     let mut curve_points: Vec<CurvePoint> = Vec::new();
     let mut acc: i64 = 0;
     let mut acc_bb: f64 = 0.0;
@@ -57,6 +118,9 @@ pub fn profit_curve(hands: &[Hand], player: &str) -> Vec<CurvePoint> {
             continue;
         }
         if !hand.seats.iter().any(|seat| seat.player == player) {
+            continue;
+        }
+        if !matches_filters(hand, player, &filters) {
             continue;
         }
         let net: i64 = net_result(hand, player);

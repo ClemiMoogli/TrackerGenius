@@ -5,20 +5,6 @@ pub struct TableInfo {
     pub button_number: u8,
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct CurvePoint {
-    pub hand_id: String,
-    pub date: String,
-    pub net: i64,
-    pub net_bb: f64,
-    pub cumulative: i64,
-    pub cumulative_bb: f64,
-    pub cumulative_showdown: i64,
-    pub cumulative_showdown_bb: f64,
-    pub cumulative_nonshowdown: i64,
-    pub cumulative_nonshowdown_bb: f64,
-}
-
 pub enum GameFormat {
     Tournament,
     CashGame,
@@ -56,7 +42,7 @@ pub struct Action {
     pub action: ActionKind,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq)]
 pub enum Street {
     Preflop,
     Flop,
@@ -64,6 +50,7 @@ pub enum Street {
     River,
 }
 
+#[derive(Serialize, Deserialize)]
 pub enum ActionKind {
     PostSmallBlind(i64),
     PostBigBlind(i64),
