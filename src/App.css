@@ -54,19 +54,47 @@ body {
 
 .header {
     background:var(--bg-surface);
-    min-height: 8vh;
-    width: 100%;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
+    padding: 12px 24px;
+    border-bottom: 1px solid var(--border-surface);
 }
 
 .header h1 {
+    margin:0;
     font-family: "Arial";
     color: var(--text-heading);
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: bold;
 }
+
+.header nav {
+    display: flex;
+    gap: 4px;
+}
+
+.header nav button {
+    font: inherit;
+    padding: 6px 14px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.header nav button:hover {
+    color: var(--text-heading);
+    background: var(--bg-segmented-control);
+}
+
+.header nav button.active {
+    color: var(--text-heading);
+    background: var(--bg-option-selected);
+}
+
 
 .stats-panel {
     background-color:  var(--bg-surface);

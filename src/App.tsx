@@ -2,10 +2,8 @@ import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
 import { CurvePoint } from "./types";
-import { StatsPanel } from "./components/StatsPanel";
-import { ProfitChart } from "./components/ProfitChart";
-import { ChartControls } from "./components/ChartControls";
 import { Header } from "./components/Header";
+import GraphScreen from "./components/GraphScreen";
 
 // faire un deuxieme ecran pour montrer les statistiques.
 
@@ -27,6 +25,7 @@ function App() {
   const [unit, setUnit] = useState<"eur" | "bb">("eur");
   const [showdown, setShowdown] = useState<true | false>(false);
   const [nonshowdown, setNonshowdown] = useState<true | false>(false);
+  const [screen, setScreen] = useState<"graph" | "stats">("graph");
   const [filters, setFilters] = useState<Filters>({start_date:null, end_date:null, position:null, street: null, action:null});
   useEffect(() => {
     invoke<CurvePoint[]>("get_profit_curve", { player: "MrAlambic", filters:filters})
@@ -35,13 +34,12 @@ function App() {
   }, [filters]);
   return (
     <>
-      <Header />
-      <StatsPanel points={points} />
-      <div className="chart-card">
-        <ChartControls unit={unit} filters={filters} showdown={showdown} nonshowdown={nonshowdown} onUnitChange={setUnit} onFilterChange={setFilters} onShowdownChange={setShowdown} onNonshowdownChange={setNonshowdown} />
-        <ProfitChart points={points} unit={unit} showdown={showdown} nonshowdown={nonshowdown} />
-      </div>
-      </>
+      <Header onScreenChange={setScreen} />
+      {screen === "graph"
+        ? <GraphScreen points={points} unit={unit} filters={filters} showdown={showdown} nonshowdown={nonshowdown} onUnitChange={setUnit} onFilterChange={setFilters} onShowdownChange={setShowdown} onNonshowdownChange={setNonshowdown} />
+        : <p>Page stats en cours de creation</p>
+      }
+    </>
   );
 }
 
