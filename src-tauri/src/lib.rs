@@ -1,5 +1,6 @@
 mod analysis;
 mod commands;
+mod equity_calculator;
 mod loader;
 mod parser;
 mod types;

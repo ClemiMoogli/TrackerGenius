@@ -17,6 +17,36 @@ pub enum PokerFormat {
     Other,
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Rank {
+    Two,
+    Three,
+    Four,
+    Five,
+    Six,
+    Seven,
+    Eight,
+    Nine,
+    Ten,
+    Jack,
+    Queen,
+    King,
+    Ace,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Suit {
+    Clubs,
+    Diamonds,
+    Hearts,
+    Spades,
+}
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub struct Card {
+    pub rank: Rank,
+    pub suit: Suit,
+}
+
 pub struct Hand {
     pub game_format: GameFormat,
     pub id: String,
@@ -28,12 +58,14 @@ pub struct Hand {
     pub seats: Vec<Seat>,
     pub actions: Vec<Action>,
     pub is_showdown: bool,
+    pub board: Vec<Card>,
 }
 
 pub struct Seat {
     pub number: u8,
     pub player: String,
     pub stack: i64,
+    pub cards: Option<[Card; 2]>,
 }
 
 pub struct Action {

@@ -1,6 +1,7 @@
 use crate::loader::load_data;
 use crate::types::{
-    Action, ActionKind, GameFormat, Hand, Header, PokerFormat, Seat, Street, TableInfo,
+    Action, ActionKind, Card, GameFormat, Hand, Header, PokerFormat, Rank, Seat, Street, Suit,
+    TableInfo,
 };
 
 fn parse_amount(text: &str) -> Result<i64, String> {
@@ -9,6 +10,55 @@ fn parse_amount(text: &str) -> Result<i64, String> {
         .parse()
         .map_err(|_| format!("Montant invalid: {}", text))?;
     Ok((value * 100.0).round() as i64)
+}
+
+fn parse_card(text: &str) -> Result<Card, String> {
+    let error = || format!("Format de carte invalid: {}", text);
+    let mut chars = text.chars();
+    let rank_char = chars.next().ok_or_else(error)?;
+    let suit_char = chars.next().ok_or_else(error)?;
+    if chars.next().is_some() {
+        return Err(error());
+    }
+    let rank = match rank_char {
+        '2' => Rank::Two,
+        '3' => Rank::Three,
+        '4' => Rank::Four,
+        '5' => Rank::Five,
+        '6' => Rank::Six,
+        '7' => Rank::Seven,
+        '8' => Rank::Eight,
+        '9' => Rank::Nine,
+        'T' => Rank::Ten,
+        'J' => Rank::Jack,
+        'Q' => Rank::Queen,
+        'K' => Rank::King,
+        'A' => Rank::Ace,
+        _ => return Err(error()),
+    };
+    let suit = match suit_char {
+        's' => Suit::Spades,
+        'h' => Suit::Hearts,
+        'c' => Suit::Clubs,
+        'd' => Suit::Diamonds,
+        _ => return Err(error()),
+    };
+    let card = Card { rank, suit };
+    Ok(card)
+}
+
+fn parse_cards(text: &str) -> Result<Vec<Card>, String> {
+    let mut cards = Vec::new();
+    for part in text.split(" ") {
+        cards.push(parse_card(part)?)
+    }
+    Ok(cards)
+}
+
+fn bracket_content(line: &str) -> Option<&str> {
+    let (_, rest) = line.rsplit_once('[')?;
+    let (inside, _) = rest.split_once(']')?;
+    Some(inside)
 }
 
 fn parse_seat(line: &str) -> Result<Seat, String> {
@@ -21,6 +71,7 @@ fn parse_seat(line: &str) -> Result<Seat, String> {
         number: number.parse::<u8>().map_err(|_| error())?,
         player: player.trim().into(),
         stack: parse_amount(stack)?,
+        cards: None,
     })
 }
 fn parse_header(text: &str) -> Result<Header, String> {
@@ -176,6 +227,7 @@ fn parse_hand(text: &str) -> Result<Hand, String> {
     }
     // recuperer les infos sur les actions.
     let mut actions: Vec<Action> = Vec::new();
+    let mut board: Vec<Card> = Vec::new();
     let mut street: Street = Street::Preflop;
     while let Some(line) = lines.next() {
         if line.starts_with("*** SUMMARY ***") {
@@ -183,12 +235,18 @@ fn parse_hand(text: &str) -> Result<Hand, String> {
         }
         if line.contains("*** FLOP ***") {
             street = Street::Flop;
+            let cards = bracket_content(line).ok_or("Flop introuvable")?;
+            board.extend(parse_cards(cards)?);
         }
         if line.contains("*** TURN ***") {
             street = Street::Turn;
+            let card = bracket_content(line).ok_or("Turn introuvable")?;
+            board.extend(parse_cards(card)?);
         }
         if line.contains("*** RIVER ***") {
             street = Street::River;
+            let card = bracket_content(line).ok_or("River introuvable")?;
+            board.extend(parse_cards(card)?);
         }
         if line.contains("*** SHOW DOWN ***") {
             street = Street::River;
@@ -196,6 +254,26 @@ fn parse_hand(text: &str) -> Result<Hand, String> {
         }
         if let Some(action) = parse_action(street, line)? {
             actions.push(action);
+        }
+        if let Some(rest) = line.strip_prefix("Dealt to ") {
+            let (player_name, _) = rest.rsplit_once(" [").ok_or("Invalid Dealt to line")?;
+            // ToDo: on peut factoriser avec la partie shows
+            if let Some(seat) = seats.iter_mut().find(|s| s.player == player_name) {
+                let card = bracket_content(line).ok_or("cartes introuvable")?;
+                let tmp = parse_cards(card)?
+                    .try_into()
+                    .map_err(|_| "Il faut obligatoirement deux cartes".to_string())?;
+                seat.cards = Some(tmp);
+            };
+        }
+        if let Some((player, _)) = line.split_once(" shows [") {
+            if let Some(seat) = seats.iter_mut().find(|p| p.player == player) {
+                let card = bracket_content(line).ok_or("cartes introuvable")?;
+                let tmp = parse_cards(card)?
+                    .try_into()
+                    .map_err(|_| "Il faut obligatoirement deux cartes".to_string())?;
+                seat.cards = Some(tmp);
+            };
         }
     }
     // recuperer les infos sur le SUMMARY
@@ -210,6 +288,7 @@ fn parse_hand(text: &str) -> Result<Hand, String> {
         seats: seats,
         actions: actions,
         is_showdown: is_showdown,
+        board: board,
     };
     Ok(hand)
 }
